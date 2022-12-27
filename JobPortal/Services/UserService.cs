@@ -1,34 +1,65 @@
-﻿/*
+﻿// parte apelata de client (ex ticketing), apelata la randul sau din controller
+using AutoMapper;
+using JobPortal.Data;
+using JobPortal.Helpers.JwtToken;
+using JobPortal.Helpers.JwtUtils;
+using JobPortal.Models;
 using JobPortal.Models.DTOs;
 using JobPortal.Repositories.UserRepository;
+using Microsoft.EntityFrameworkCore;
+using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace JobPortal.Services
 {
     public class UserService : IUserService
     {
         public IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly IMapper _mapper;
+        public IJwtUtils _jwtUtils;
+
+        
+        public UserService(IUserRepository userRepository, IMapper mapper, IJwtUtils jwtUtils)
         {
             _userRepository = userRepository;
-        }
-        
-        //private readonly PortalDbContext _context;
-        //private readonly IMapper _mapper;
-        
-        public UserService(JobPortalDbContext context, IMapper mapper)
-        {
-            _context = context;
             _mapper = mapper;
+            _jwtUtils = jwtUtils;
         }
-        
+
+        private readonly PortalContext _context;
+
+        public UserDto GetDataMappedByUsername(string Username)
+        {
+            User user = _userRepository.GetByUsername(Username);
+            /*
+            var userDtoResult = new UserDto
+            {
+                Username = user.UserName,
+                Email = user.Email,
+                Password = user.Password
+            };
+            */
+            var userDtoResult = _mapper.Map<UserDto>(user);
+            return userDtoResult;
+        }
+
+     
         public async Task<List<UserDto>> GetAllUsers()
         {
             var users = await _context.Users.ToListAsync();
             var usersDto = _mapper.Map<List<UserDto>>(users);
             return usersDto;
         }
-        
+        public UserResponseDto Authenticate(UserRequestDtocs model)
+        {
+            var user = _userRepository.FindByUsername(model.UserName);
+            if (user == null || !BCryptNet.Verify(model.Password, user.PasswordHash))
+            {
+                return null;
+            }
+            var jwtToken = _jwtUtils.GenerateJwtToken(user);
+            return new UserResponseDto(user, jwtToken);
+        }
+
     }
 
 }
-*/

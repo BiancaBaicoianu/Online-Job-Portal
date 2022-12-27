@@ -1,4 +1,4 @@
-﻿/*
+﻿
 using JobPortal.Models.Base;
 namespace JobPortal.Repositories.GenericRepository
 {
@@ -7,6 +7,10 @@ namespace JobPortal.Repositories.GenericRepository
         // get all data
         Task<List<TEntity>> GetAllAsync();
         IQueryable<TEntity> GetAllAsQueryable();
+        
+        //IEnumerable -> executa query pe server, incarca datele in memorie, apoi face filtre
+
+
 
         // create
         void Create(TEntity entity);
@@ -31,4 +35,3 @@ namespace JobPortal.Repositories.GenericRepository
         Task<bool> SaveAsync();
     }
 }
-*/

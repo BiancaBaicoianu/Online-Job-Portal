@@ -1,4 +1,4 @@
-﻿/*
+﻿// accesam direct doar din repositories
 using JobPortal.Data;
 using JobPortal.Models.Base;
 using JobPortal.Repositories.GenericRepository;
@@ -23,13 +23,14 @@ namespace JobPortal.Repositories.GenericRepository
         public async Task<List<TEntity>> GetAllAsync()
         {
             var allItems = await _table.AsNoTracking().ToListAsync();
+            // AsNoTracking -> folosim cand stim ca nu vrem sa facem modificari asupra datelor
             return allItems;
         }
 
         public IQueryable<TEntity> GetAllAsQueryable()
         {
-            return _table.AsQueryable();
-            // return _table.AsNoTracking();
+            //return _table.AsQueryable();
+            return _table.AsNoTracking();   // returneaza un IQueryable
 
             //var entityList = _table.ToList();
             //var entityListFiltered1 = entityList.Where(x => x.Id.ToString() != "");
@@ -74,7 +75,6 @@ namespace JobPortal.Repositories.GenericRepository
         }
 
         // delete
-
         public void Delete(TEntity entity)
         {
             _table.Remove(entity);
@@ -91,11 +91,13 @@ namespace JobPortal.Repositories.GenericRepository
             return _table.Find(id);
 
             //another options
+            /*
             return _table.FirstOrDefault(x => x.Id.Equals(id));
             return _table.Single(x => x.Id.Equals(id));
             return _table.SingleOrDefault(x => x.Id.Equals(id));
             return _table.Last(x => x.Id.Equals(id));
             return _table.LastOrDefault(x => x.Id.Equals(id));
+            */
         }
 
         public async Task<TEntity> FindByIdAsync(object id)
@@ -103,15 +105,16 @@ namespace JobPortal.Repositories.GenericRepository
             return await _table.FindAsync(id);
 
             //another options
-            //return await _table.FirstOrDefaultAsync(x => x.Id.Equals(id));
-            //return await _table.SingleAsync(x => x.Id.Equals(id));
-            //return await _table.SingleOrDefaultAsync(x => x.Id.Equals(id));
-            //return await _table.LastAsync(x => x.Id.Equals(id));
-            //return await _table.LastOrDefaultAsync(x => x.Id.Equals(id));
+            /*
+            return await _table.FirstOrDefaultAsync(x => x.Id.Equals(id));
+            return await _table.SingleAsync(x => x.Id.Equals(id));
+            return await _table.SingleOrDefaultAsync(x => x.Id.Equals(id));
+            return await _table.LastAsync(x => x.Id.Equals(id));
+            return await _table.LastOrDefaultAsync(x => x.Id.Equals(id));
+            */
         }
 
         // save
-
         public bool Save()
         {
             try
@@ -141,4 +144,3 @@ namespace JobPortal.Repositories.GenericRepository
         }
     }
 }
-*/
