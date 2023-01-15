@@ -1,15 +1,13 @@
 ﻿
 using JobPortal.Models;
-using JobPortal.Repositories.GenericRepository;
+using JobPortal.Repository;
 
 namespace JobPortal.Repositories.UserRepository
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        User FindByUsername(string username);
-        List<User> GetAlWithInclude();
-        List<User> GetAlWithJoin();
-        User GetByUsername(string username);
+        Task<User?> GetUserByEmail(string email);
+        Task<User?> GetUserByEmailAndHashedPassword(string email, string hash);
     }
-
 }
+

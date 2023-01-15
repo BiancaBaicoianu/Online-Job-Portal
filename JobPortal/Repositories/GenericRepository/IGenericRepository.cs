@@ -1,37 +1,16 @@
-﻿
-using JobPortal.Models.Base;
-namespace JobPortal.Repositories.GenericRepository
+﻿namespace JobPortal.Repository
 {
-    public interface IGenericRepository<TEntity> where TEntity : BaseEntity
+    public interface IGenericRepository<T>
     {
-        // get all data
-        Task<List<TEntity>> GetAllAsync();
-        IQueryable<TEntity> GetAllAsQueryable();
-        
-        //IEnumerable -> executa query pe server, incarca datele in memorie, apoi face filtre
+        Task<List<T>> GetAll();
 
+        Task<T?> GetById(int id);
 
+        Task Create(T entity);
 
-        // create
-        void Create(TEntity entity);
-        Task CreateAsync(TEntity entity);
-        void CreateRange(IEnumerable<TEntity> entities);
-        Task CreateRangeAsync(IEnumerable<TEntity> entities);
+        Task Update(T entity);
 
-        // update
-        void Update(TEntity entity);
-        void UpdateRange(IEnumerable<TEntity> entities);
-
-        // delete
-        void Delete(TEntity entity);
-        void DeleteRange(IEnumerable<TEntity> entities);
-
-        // find 
-        TEntity FindById(object id);
-        Task<TEntity> FindByIdAsync(object id);
-
-        // save
-        bool Save();
-        Task<bool> SaveAsync();
+        Task Delete(T entity);
+        Task<Repositories.EmployeeApplyingForJobRepository?> GetEmployeeApplyingForJobByIds(Guid EmployeeId, Guid JobId);
     }
 }

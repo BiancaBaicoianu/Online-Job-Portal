@@ -11,12 +11,13 @@ using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// legam contextul de baza de date cu aplicatia noastra (PortalContext) 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<PortalContext>(options =>
+    options.UseSqlServer(connectionString));
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-// legam contextul de baza de date cu aplicatia noastra (PortalContext) 
-builder.Services.AddDbContext<PortalContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
@@ -66,3 +67,6 @@ void SeedData(IHost app)
         service.SeedInitialUsers();
     }
 }
+
+
+

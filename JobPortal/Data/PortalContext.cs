@@ -8,8 +8,9 @@ namespace JobPortal.Data
     {
         //Tabels
         public DbSet<User> Users { get; set; }  // Users = numele tabelei
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Job> Jobs { get; set; }
-        public DbSet<UserApplyingForJob> UsersApplyingForJobs { get; set; }
+        public DbSet<EmployeeApplyingForJob> EmployeesApplyingForJobs { get; set; }
         public DbSet<JobOffer> JobOffers { get; set; }
         public DbSet<Company> Companies { get; set; }
         public PortalContext(DbContextOptions<PortalContext> options) : base(options)   // constructor
@@ -20,28 +21,36 @@ namespace JobPortal.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // cheie compusa
-            modelBuilder.Entity<UserApplyingForJob>()
-                        .HasKey(mr => new { mr.UserId, mr.JobId });
-            
-            // fluent API
-            //One to Many
-            modelBuilder.Entity<UserApplyingForJob>()
-                .HasOne(mr => mr.Job)
-                .WithMany(m3 => m3.UsersApplyingForJobs)
-                .HasForeignKey(mr => mr.JobId);
-            /*
-                     modelBuilder.Entity<UserApplyingForJob>()
-                                 .HasOne(mr => mr.User)
-                                 .WithMany(m4 => m4.UsersApplyingForJobs)
-                                 .HasForeignKey(mr => mr.UserId);
-            */
+            modelBuilder.Entity<EmployeeApplyingForJob>()
+                        .HasKey(mr => new { mr.EmployeeId, mr.JobId });
 
-            // One to One
-            modelBuilder.Entity<Job>()
-                .HasOne(m5 => m5.JobOffer)
-                .WithOne(m6 => m6.Job)
-                .HasForeignKey<JobOffer>(m6 => m6.JobForeignKey);
+            // Many to Many : Employee - Job
+            modelBuilder.Entity<EmployeeApplyingForJob>()
+                        .HasOne(mr => mr.Employee)
+                        .WithMany(m => m.EmployeesApplyingForJobs)
+                        .HasForeignKey(mr => mr.EmployeeId);
+            modelBuilder.Entity<EmployeeApplyingForJob>()
+                        .HasOne(mr => mr.Job)
+                        .WithMany(r => r.EmployeesApplyingForJobs)
+                        .HasForeignKey(mr => mr.JobId);
+
+            //One to Many : Company - JobOffer
+            modelBuilder.Entity<JobOffer>()
+                        .HasOne(mr => mr.Company)
+                        .WithMany(m => m.JobsOffers)
+                        .HasForeignKey(mr => mr.CompanyId);
+
+            // One to One : Employee - User
+            modelBuilder.Entity<Employee>()
+                        .HasOne(mr => mr.User)
+                        .WithOne(r => r.Employee)
+                        .HasForeignKey<User>(mr => mr.EmployeeId);
             
+            // One to One : Job - JobOffer
+            modelBuilder.Entity<JobOffer>()
+                        .HasOne(mr => mr.Job)
+                        .WithOne(r => r.JobOffer)
+                        .HasForeignKey<JobOffer>(mr => mr.JobId);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,4 +1,5 @@
 ﻿// parte apelata de client (ex ticketing), apelata la randul sau din controller
+
 using AutoMapper;
 using JobPortal.Data;
 using JobPortal.Helpers.JwtToken;
@@ -6,7 +7,14 @@ using JobPortal.Helpers.JwtUtils;
 using JobPortal.Models;
 using JobPortal.Models.DTOs;
 using JobPortal.Repositories.UserRepository;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace JobPortal.Services
@@ -30,14 +38,7 @@ namespace JobPortal.Services
         public UserDto GetDataMappedByUsername(string Username)
         {
             User user = _userRepository.GetByUsername(Username);
-            /*
-            var userDtoResult = new UserDto
-            {
-                Username = user.UserName,
-                Email = user.Email,
-                Password = user.Password
-            };
-            */
+
             var userDtoResult = _mapper.Map<UserDto>(user);
             return userDtoResult;
         }

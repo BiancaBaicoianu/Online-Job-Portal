@@ -1,146 +1,42 @@
-﻿// accesam direct doar din repositories
-using JobPortal.Data;
-using JobPortal.Models.Base;
-using JobPortal.Repositories.GenericRepository;
-using Microsoft.Data.SqlClient;
+﻿using JobPortal.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Data.SqlClient;
-using SqlException = Microsoft.Data.SqlClient.SqlException;
 
-namespace JobPortal.Repositories.GenericRepository
+namespace JobPortal.Repository
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly PortalContext _context;
-        protected readonly DbSet<TEntity> _table;
 
         public GenericRepository(PortalContext context)
         {
             _context = context;
-            _table = _context.Set<TEntity>();
         }
 
-        public async Task<List<TEntity>> GetAllAsync()
+        public async Task Create(T entity)
         {
-            var allItems = await _table.AsNoTracking().ToListAsync();
-            // AsNoTracking -> folosim cand stim ca nu vrem sa facem modificari asupra datelor
-            return allItems;
+            await _context.Set<T>().AddAsync(entity);
         }
 
-        public IQueryable<TEntity> GetAllAsQueryable()
+        public async Task Delete(T entity)
         {
-            //return _table.AsQueryable();
-            return _table.AsNoTracking();   // returneaza un IQueryable
-
-            //var entityList = _table.ToList();
-            //var entityListFiltered1 = entityList.Where(x => x.Id.ToString() != "");
-            //var entityListFiltered2 = _table.Where(x => x.Id.ToString() != "");
-
-
-            //// better version 
-            //// select * from entity where Id is not null
-            //var entityListFiltered3 = _table.Where(x => x.Id.ToString() != "").ToList();
+            _context.Set<T>().Remove(entity);
+            await Task.CompletedTask;
         }
 
-        // create
-        public void Create(TEntity entity)
+        public async Task Update(T entity)
         {
-            _table.Add(entity);
+            _context.Set<T>().Update(entity);
+            await Task.CompletedTask;
         }
 
-        public async Task CreateAsync(TEntity entity)
+        public async Task<List<T>> GetAll()
         {
-            await _table.AddAsync(entity);
+            return await _context.Set<T>().ToListAsync();
         }
 
-        public void CreateRange(IEnumerable<TEntity> entities)
+        public async Task<T?> GetById(int id)
         {
-            _table.AddRange(entities);
-        }
-
-        public async Task CreateRangeAsync(IEnumerable<TEntity> entities)
-        {
-            await _table.AddRangeAsync(entities);
-        }
-
-        // update
-        public void Update(TEntity entity)
-        {
-            _table.Update(entity);
-        }
-
-        public void UpdateRange(IEnumerable<TEntity> entities)
-        {
-            _table.UpdateRange(entities);
-        }
-
-        // delete
-        public void Delete(TEntity entity)
-        {
-            _table.Remove(entity);
-        }
-
-        public void DeleteRange(IEnumerable<TEntity> entities)
-        {
-            _table.RemoveRange(entities);
-        }
-
-        // find
-        public TEntity FindById(object id)
-        {
-            return _table.Find(id);
-
-            //another options
-            /*
-            return _table.FirstOrDefault(x => x.Id.Equals(id));
-            return _table.Single(x => x.Id.Equals(id));
-            return _table.SingleOrDefault(x => x.Id.Equals(id));
-            return _table.Last(x => x.Id.Equals(id));
-            return _table.LastOrDefault(x => x.Id.Equals(id));
-            */
-        }
-
-        public async Task<TEntity> FindByIdAsync(object id)
-        {
-            return await _table.FindAsync(id);
-
-            //another options
-            /*
-            return await _table.FirstOrDefaultAsync(x => x.Id.Equals(id));
-            return await _table.SingleAsync(x => x.Id.Equals(id));
-            return await _table.SingleOrDefaultAsync(x => x.Id.Equals(id));
-            return await _table.LastAsync(x => x.Id.Equals(id));
-            return await _table.LastOrDefaultAsync(x => x.Id.Equals(id));
-            */
-        }
-
-        // save
-        public bool Save()
-        {
-            try
-            {
-                return _context.SaveChanges() > 0;
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return false;
-        }
-
-        public async Task<bool> SaveAsync()
-        {
-            try
-            {
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch (SqlException ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return false;
+            return await _context.Set<T>().FindAsync(id);
         }
     }
 }
