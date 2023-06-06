@@ -2,7 +2,7 @@
 {
     public class JobOfferDTO
     {
-        public Guid JobOfferId { get; set; }
+        public int JobOfferId { get; set; }
         public int NoOfPositions { get; set; }
         public int MinimumSalary { get; set; }
         public string Benefits { get; set; }

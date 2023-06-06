@@ -2,7 +2,7 @@
 {
     public class JobDTO
     {
-        public Guid JobId { get; set; }
+        public int JobId { get; set; }
         public string JobTitle { get; set; } = string.Empty;
         public string JobDescription { get; set; } = string.Empty;
 

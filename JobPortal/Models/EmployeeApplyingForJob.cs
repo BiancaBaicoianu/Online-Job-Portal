@@ -5,9 +5,9 @@ namespace JobPortal.Models
 {
     public class EmployeeApplyingForJob
     {
-        public Guid EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
         public Employee? Employee { get; set; }
-        public Guid JobId { get; set; }
+        public int JobId { get; set; }
         public Job? Job { get; set; }
 
         public EmployeeApplyingForJob()

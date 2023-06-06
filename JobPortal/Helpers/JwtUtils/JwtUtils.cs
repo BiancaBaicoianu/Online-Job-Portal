@@ -22,7 +22,7 @@ namespace JobPortal.Helpers.JwtUtils
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Subject = new ClaimsIdentity(new[] { new Claim("id", user.UserId.ToString()) }),
                 Expires = DateTime.UtcNow.AddDays(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(appPrivateKey),
                                                             SecurityAlgorithms.HmacSha256Signature)

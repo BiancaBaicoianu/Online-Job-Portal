@@ -1,6 +1,6 @@
 ﻿using JobPortal.Helpers.JwtToken;
 using JobPortal.Helpers.Seeders;
-using JobPortal.Repositories.UserRepository;
+using JobPortal.Repositories;
 using JobPortal.Services;
 
 namespace JobPortal.Helpers.Extensions
@@ -13,14 +13,14 @@ namespace JobPortal.Helpers.Extensions
 
             return services;
         }
-
+/*
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddTransient<IUserService, UserService>();
 
             return services;
         }
-        
+ */       
         public static IServiceCollection AddSeeders(this IServiceCollection services)
         {
             services.AddScoped<UserSeeder>();

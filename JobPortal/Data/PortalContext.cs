@@ -52,7 +52,11 @@ namespace JobPortal.Data
                         .WithOne(r => r.JobOffer)
                         .HasForeignKey<JobOffer>(mr => mr.JobId);
 
+            
+            //modelBuilder.AddConfigurations();
             base.OnModelCreating(modelBuilder);
+            
+            
         }
         
     }

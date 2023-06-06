@@ -2,9 +2,9 @@
 {
     public class EmployeeApplyingForJobDTO
     {
-        public Guid EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
 
-        public Guid JobId { get; set; }
+        public int JobId { get; set; }
         public EmployeeApplyingForJobDTO(EmployeeApplyingForJob employeeApplyingForJob)
         {
             this.EmployeeId = employeeApplyingForJob.EmployeeId;

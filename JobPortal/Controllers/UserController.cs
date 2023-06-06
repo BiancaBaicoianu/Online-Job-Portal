@@ -5,6 +5,11 @@ using JobPortal.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using JobPortal.Repositories.UnitOfWork;
+using JobPortal.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
+using IAuthenticationService = JobPortal.Services.IAuthenticationService;
+
 
 namespace JobPortal.Controllers
 {
@@ -13,52 +18,98 @@ namespace JobPortal.Controllers
 
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAuthenticationService _service;
 
         private readonly PortalContext _portalContext;
 
         // dependency injection = ne aduce o instanta a clasei PortalContext
-        public UserController(PortalContext portalContext)
+        public UserController(IUnitOfWork unitOfWork, IAuthenticationService service)
         {
-                _portalContext = portalContext;
+            _unitOfWork = unitOfWork;
+            _service = service;
         }
-        public UserController(IUserService userContext)
-        {
-            _userService = userContext;
-        }
-
+        
+        //GET all users
         [HttpGet]
-        // accesam datele din baza de date
-        public async Task<IActionResult> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            var users = await _portalContext.Users.ToListAsync();
-            return Ok(users);
+            var users = (await _unitOfWork.Users.GetAll()).Select(a => new UserDto(a)).ToList();
+            return users;
         }
-        [HttpGet("userById/{id}")]
-        public async Task<IActionResult> GetUserById([FromRoute]Guid id)
+        
+        // GET: api/User/email
+        [HttpGet("{email}")]
+        public async Task<ActionResult<UserDto>> GetUser(string email)
         {
-            var user = await _portalContext.Users.FirstOrDefaultAsync(x => x.Id == id);
-            return Ok(user);
-        }
-        [HttpPost("addUser")]
-        public async Task<IActionResult> AddUser([FromBody] UserDto userDto)
-        {
-            var newUser = new User
+            var user = await _unitOfWork.Users.GetUserByEmail(email);
+
+            if (user == null)
             {
-                Id = Guid.NewGuid(),
-                UserName = userDto.Username,
-                Email = userDto.Email,
-                PasswordHash = userDto.Password
-            };
-            await _portalContext.Users.AddAsync(newUser);
-            await _portalContext.SaveChangesAsync();
-            return Ok(newUser);
+                return NotFound("User with this email doesn't exist");
+            }
+
+            return new UserDto(user);
         }
 
-        public IActionResult GetByUsername(string username)
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("Login")]
+        public async Task<IActionResult> Authenticate(UserLoginDTO user)
         {
-            var user = _userService.GetDataMappedByUsername(username);
-            return Ok(user);
+            Token? token;
+            try
+            {
+                token = await _service.Authenticate(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            if (token == null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(token);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("Register")]
+        public async Task<IActionResult> PostUser(UserRegisterDTO user)
+        {
+            try
+            {
+                var newUser = await _service.Register(user);
+                await _unitOfWork.Users.Create(newUser);
+                _unitOfWork.Save();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            return Ok();
+        }
+
+        // DELETE: api/Users/id
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var userInDb = await _unitOfWork.Users.GetById(id);
+
+            if (userInDb == null)
+            {
+                return NotFound("User with this id doesn't exist");
+            }
+
+            await _unitOfWork.Users.Delete(userInDb);
+            _unitOfWork.Save();
+
+            return Ok();
         }
     }
-    }
+}

@@ -129,5 +129,8 @@
       }
     }
   },
-  "defaultProject": "JobPortal"
+  "defaultProject": "JobPortal",
+  "cli": {
+    "analytics": false
+  }
 }

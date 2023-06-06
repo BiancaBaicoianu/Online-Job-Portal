@@ -11,9 +11,11 @@ namespace JobPortal.Helpers.Middleware
         {
             _nextRequestDelegate = nextRequestDelegate;
         }
-        public async Task Invoke(HttpContext httpContext, IUserService userService, IJwtUtils jwtUtils)
+        
+        public async Task Invoke(HttpContext httpContext, IAuthenticationService userService, IJwtUtils jwtUtils)
         {
             var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            //var userId = jwtUtils.ValidateJwtToken(token);
             if (token != null)
             {
                 var userId = jwtUtils.ValidateJwtToken(token);
@@ -30,4 +32,6 @@ namespace JobPortal.Helpers.Middleware
         }
 
     }
+      
+       
 }

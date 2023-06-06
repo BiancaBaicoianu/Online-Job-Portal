@@ -1,5 +1,6 @@
 ﻿using JobPortal.Data;
 using JobPortal.Models;
+using JobPortal.Models.Enums;
 
 namespace JobPortal.Helpers.Seeders
 {
@@ -17,19 +18,23 @@ namespace JobPortal.Helpers.Seeders
             {
                 var user1 = new User
                 {
-                    UserName = "User1",
-                    FirstName = "Ioana",
-                    LastName = "Popescu",
-                    Age = 20,
-                    Email = "user1@gmail.com"
+                    UserId = 1,
+                    EmployeeId = 1,
+                    Email = "user1@gmail.com",
+                    PasswordHash = "1234",
+                    PasswordSalt = "1234",
+                    PhoneNumber = "1234567890",
+                    Role = Role.user
                 };
                 var user2 = new User
                 {
-                    UserName = "User2",
-                    FirstName = "Maria",
-                    LastName = "Ionescu",
-                    Age = 27,
-                    Email = "user2@gmail.com"
+                    UserId = 2,
+                    EmployeeId = 2,
+                    Email = "user2@gmail.com",
+                    PasswordHash = "1234",
+                    PasswordSalt = "1234",
+                    PhoneNumber = "1234567890",
+                    Role = Role.user
                 };
                 _portalContext.Add(user1);
                 _portalContext.Add(user2);
@@ -50,7 +55,7 @@ namespace JobPortal.Helpers.Seeders
 
                     _context.Users.Add(user);
                 }
-                */
+             */   
             }
         }
     }

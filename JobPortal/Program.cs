@@ -1,13 +1,18 @@
 using JobPortal.Data;
+using JobPortal.Repositories.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
+using JobPortal.Repositories;
+using JobPortal.Repositories.UnitOfWork;
+using JobPortal.Services;
 using JobPortal.Helpers;
 using JobPortal.Helpers.Extensions;
-using JobPortal.Helpers.Middleware;
-using JobPortal.Helpers.Seeders;
-using JobPortal.Repositories.UserRepository;
-using JobPortal.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using static System.Formats.Asn1.AsnWriter;
+using JobPortal.Helpers.JwtUtils;
+using Microsoft.AspNetCore.Builder;
+//using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+//using Swashbuckle.AspNetCore.Filters;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,56 +22,77 @@ builder.Services.AddDbContext<PortalContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-builder.Services.AddTransient<IUserRepository, UserRepository>();   // se creeaza de fiecare data cand se face request
-//builder.Services.AddSingleton<IUserRepository, UserRepository>();   //  -||- la primul request
-//builder.Services.AddScoped<IUserRepository, UserRepository>();      //-||- o singura data/request de la client
-builder.Services.AddTransient<IUserService, UserService>();
-
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+//builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddSeeders();
+
+//transient => se creeze de fiecare cand se face un request
+//scoped => se creeaza o singura data pe request
+//singleton => se creeaza o singura data pe aplicatie
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddScoped<IJwtUtils, JwtUtils>();
+builder.Services.AddEndpointsApiExplorer();
+
+// Add authentication scheme
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            builder.Configuration.GetSection("AppSettings:Token").Value!))
+
+    };
+});
 
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// cand se face request, trecem prin fiecare middleware !conteaza ordinea
+// pentru response => ordine inversa
+if (app.Environment.IsDevelopment())
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
-app.UseMiddleware<JwtMiddleware>();
+
+app.UseAuthentication();
+app.UseAuthorization();
+//app.UseMiddleware<JwtMiddleware>();
 app.MapControllers();
-app.UseStaticFiles();
-app.UseRouting();
-
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
-
-app.MapFallbackToFile("index.html"); ;
 
 app.Run();
 
-void SeedData(IHost app)
+
+void SeedData(IHost app) // se ruleaza la inceput cand nu ai nimic in tabela
 {
-    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
-    using (var scope = scopedFactory.CreateScope())
+    var scopeFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopeFactory.CreateScope())
     {
-        var service = scope.ServiceProvider.GetService<UserSeeder>();
-        service.SeedInitialUsers();
+        var seeder = scope.ServiceProvider.GetService<UserSeeder>(); // luam serviciile inregistrate
+        seeder.SeedInitialUsers();
     }
 }
-
-
-
