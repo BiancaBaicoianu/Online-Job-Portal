@@ -1,5 +1,4 @@
-﻿
-using JobPortal.Models;
+﻿using JobPortal.Models;
 using JobPortal.Models.DTOs;
 using JobPortal.Models.Enums;
 using JobPortal.Repositories.UnitOfWork;
@@ -67,8 +66,27 @@ namespace JobPortal.Services
                 Audience = _configuration["JWT:Audience"]
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
+            //var refreshToken = GenerateRefreshToken();
+            //SetRefreshToken(refreshToken);
             return new Token { TokenString = tokenHandler.WriteToken(token) };
         }
+        /*
+        private RefreshToken GenerateRefreshToken()
+        {
+            var refreshToken = new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                Expires = DateTime.Now.AddMinutes(20),
+                Created = DateTime.Now
+            };
+            return refreshToken;
+        }
+        private void SetRefreshToken(RefreshToken refreshToken)
+        {
+            _unitOfWork.RefreshTokens.Add(refreshToken);
+            _unitOfWork.Complete();
+        }
+        */
 
         public async Task<User> Register(UserRegisterDTO user)
         {

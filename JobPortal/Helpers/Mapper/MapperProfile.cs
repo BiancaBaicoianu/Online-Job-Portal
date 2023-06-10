@@ -2,8 +2,8 @@
 using JobPortal.Models;
 using JobPortal.Models.DTOs;
 
-/*
 
+/*
 namespace JobPortal.Helpers.Mapper
 {
     public class MapperProfile : Profile
